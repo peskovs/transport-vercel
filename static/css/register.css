@@ -1,0 +1,53 @@
+.max-w-xl form {
+    width: 100%;
+}
+
+.max-w-xl label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.max-w-xl input,
+.max-w-xl select,
+.max-w-xl textarea {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    background-color: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.max-w-xl input:focus,
+.max-w-xl select:focus,
+.max-w-xl textarea:focus {
+    outline: none;
+    border-color: #2563EB;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.max-w-xl .text-red-600 {
+    color: #dc2626;
+}
+
+.max-w-xl button[type="submit"] {
+    background-color: #3B82F6;
+    color: #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.max-w-xl button[type="submit"]:hover {
+    background-color: #2563EB;
+}
+
+@media (max-width: 640px) {
+    .max-w-xl {
+        padding: 0 1rem;
+    }
+}
