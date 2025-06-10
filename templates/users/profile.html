@@ -1,0 +1,316 @@
+<!-- templates/users/profile.html -->
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}SmartTransport - {% trans "My Profile" %}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row gap-6">
+    <!-- Kreisā sānjosla - Lietotāja informācija -->
+    <div class="md:w-1/3">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Lietotāja galvene -->
+            <div class="bg-blue-600 p-6 text-center text-white">
+                <div class="w-24 h-24 rounded-full bg-white mx-auto mb-4 flex items-center justify-center text-blue-600 text-3xl font-bold">
+                    {{ user.first_name|first }}{{ user.last_name|first }}
+                </div>
+                <div class="mb-1">
+                  <span class="block text-3xl font-extrabold text-white leading-tight">{{ user.username }}</span>
+                  <span class="block text-xl font-semibold text-blue-100">{{ user.get_full_name|default:_("No name specified") }}</span>
+                </div>
+                <p class="text-blue-200">
+                    {% if user.loma == 'parasts_lietotajs' %}
+                    {% trans "Regular User" %}
+                    {% elif user.loma == 'administrators' %}
+                    {% trans "Administrator" %}
+                    {% elif user.loma == 'transporta_operators' %}
+                    {% trans "Transport Operator" %}
+                    {% elif user.loma == 'pilsetas_planotajs' %}
+                    {% trans "City Planner" %}
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Lietotāja detaļas -->
+            <div class="p-6">
+                <div class="flex items-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <div>
+                        <p class="text-sm text-gray-500">{% trans "Email" %}</p>
+                        <p class="text-gray-900">{{ user.email }}</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <div>
+                        <p class="text-sm text-gray-500">{% trans "Phone" %}</p>
+                        <p class="text-gray-900">{{ user.talrunis|default:_("Not specified") }}</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <div>
+                        <p class="text-sm text-gray-500">{% trans "Registered" %}</p>
+                        <p class="text-gray-900">{{ user.date_joined|date:"d.m.Y" }}</p>
+                    </div>
+                </div>
+
+                <a href="{% url 'users:edit_profile' %}" class="mt-4 w-full flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    {% trans "Edit profile" %}
+                </a>
+            </div>
+
+            <!-- Sistēmas statistika -->
+            <div class="border-t border-gray-200 p-6">
+                <h3 class="font-medium mb-4">{% trans "My activity" %}</h3>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 bg-blue-50 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-blue-600 mb-1">
+                            {{ reports|length }}
+                        </div>
+                        <div class="text-sm text-gray-600">{% trans "Reports" %}</div>
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-purple-600 mb-1">
+                            {{ review_count }}
+                        </div>
+                        <div class="text-sm text-gray-600">{% trans "Reviews" %}</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-4 mt-4">
+                    <div class="p-3 bg-green-50 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-green-600 mb-1">
+                            {{ saved_routes|length }}
+                        </div>
+                        <div class="text-sm text-gray-600">{% trans "Saved routes" %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Labā puse - Cilnes -->
+    <div class="md:w-2/3">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <!-- Cilnes -->
+            <div class="flex border-b border-gray-200">
+                <button class="px-4 py-3 font-medium text-sm flex-1 text-blue-600 border-b-2 border-blue-600" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17v1a3 3 0 003 3h12a3 3 0 003-3v-1" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4" />
+                    </svg>
+                    {% trans "Activity" %}
+                </button>
+                <button class="px-4 py-3 font-medium text-sm flex-1 text-gray-500 hover:text-gray-700" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="inline h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                    {% trans "Saved Routes" %}
+                </button>
+                <button class="px-4 py-3 font-medium text-sm flex-1 text-gray-500 hover:text-gray-700" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    {% trans "Reports" %}
+                </button>
+            </div>
+
+            <!-- Tab contents -->
+            <div class="tab-content" id="tab-activity">
+                <div class="p-6">
+                    <h3 class="font-medium mb-4">{% trans "Recent Activity" %}</h3>
+                    <div class="space-y-4">
+                        {% for report in reports %}
+                        <div class="flex items-start p-3 bg-gray-50 rounded-lg">
+                            <div class="mr-3">
+                                {% if report.tips == 'sastregums' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                {% elif report.tips == 'transporta_noslogojums' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                                </svg>
+                                {% elif report.tips == 'cela_stavoklis' or report.tips == 'pietura_stavoklis' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-gray-800">
+                                    {% if report.tips == 'sastregums' %}
+                                    {% trans "Congestion report" %}
+                                    {% elif report.tips == 'transporta_noslogojums' %}
+                                    {% trans "Vehicle congestion report" %}
+                                    {% elif report.tips == 'cela_stavoklis' %}
+                                    {% trans "Road condition report" %}
+                                    {% elif report.tips == 'pietura_stavoklis' %}
+                                    {% trans "Stop condition report" %}
+                                    {% elif report.tips == 'negadijums' %}
+                                    {% trans "Accident report" %}
+                                    {% else %}
+                                    {% trans "Other report" %}
+                                    {% endif %}
+                                    : {{ report.apraksts }}
+                                </p>
+                                <p class="text-sm text-gray-500">{{ report.laiks }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% for review in user_reviews %}
+                        <div class="flex items-start p-3 bg-purple-50 rounded-lg">
+                            <div class="mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V2a2 2 0 012-2h2" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-gray-800">
+                                    <span class="font-semibold">{% trans "Review for route" %}:</span>
+                                    {{ review.marsruts.numurs }} – {{ review.marsruts.nosaukums }}
+                                    <a href="{% url 'transport:route_details' review.marsruts.pk %}" class="inline-flex items-center px-2 py-1 ml-2 text-xs font-semibold bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" style="vertical-align:middle;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                        {% trans "Go to route" %}
+                                    </a>
+                                    {% if user.is_authenticated and review.lietotajs == user %}
+                                    <form method="post" action="{% url 'transport:delete_atsauksme' review.pk %}" style="display:inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <button type="submit" class="text-red-600 hover:underline ml-2">{% trans "Delete" %}</button>
+                                    </form>
+                                    {% elif user.is_authenticated and user.is_superuser %}
+                                    <form method="post" action="{% url 'transport:delete_atsauksme' review.pk %}" style="display:inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <button type="submit" class="text-red-600 hover:underline ml-2">{% trans "Delete" %}</button>
+                                    </form>
+                                    {% elif user.is_authenticated and user.loma == 'administrators' %}
+                                    <form method="post" action="{% url 'transport:delete_atsauksme' review.pk %}" style="display:inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <button type="submit" class="text-red-600 hover:underline ml-2">{% trans "Delete" %}</button>
+                                    </form>
+                                    {% endif %}
+                                </p>
+                                <p class="text-gray-700 mt-1">{{ review.saturs|linebreaks }}</p>
+                                <p class="text-sm text-gray-500 mt-1">{{ review.laiks|date:"Y-m-d H:i" }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="text-center p-4 bg-gray-50 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-gray-500">{% trans "No recent activity" %}</p>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <a href="{% url 'transport:report_traffic' %}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            {% trans "Report an Issue" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" id="tab-saved" style="display:none">
+                <div class="p-6">
+                    <h3 class="font-medium mb-4">{% trans "Saved Routes" %}</h3>
+
+                    {% if saved_routes and saved_routes|length > 0 %}
+                        <ul class="divide-y divide-gray-200">
+                            {% for fav in saved_routes %}
+                                <li class="py-3 flex items-center justify-between">
+                                    <div>
+                                        <span class="font-bold text-blue-700">{{ fav.route.numurs }}</span>
+                                        <span class="ml-2 text-gray-800">{{ fav.route.nosaukums }}</span>
+                                    </div>
+                                    <a href="{% url 'transport:route_details' fav.route.pk %}" class="text-blue-600 hover:underline flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                        {% trans "View" %}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-gray-500">{% trans "You have no saved routes yet." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="tab-content" id="tab-reports" style="display:none">
+                <div class="p-6">
+                    <h3 class="font-medium mb-4">{% trans "Saved Routes" %}</h3>
+                    {% if reports and reports|length > 0 %}
+                        <ul class="divide-y divide-gray-200">
+                        {% for report in reports %}
+                            <li class="py-3 flex flex-col md:flex-row md:items-center justify-between">
+                                <div>
+                                    <span class="font-bold text-blue-700">
+                                        {% if report.tips == 'sastregums' %}{% trans 'Congestion' %}
+                                        {% elif report.tips == 'transporta_noslogojums' %}{% trans 'Vehicle Congestion' %}
+                                        {% elif report.tips == 'cela_stavoklis' %}{% trans 'Road Condition' %}
+                                        {% elif report.tips == 'pietura_stavoklis' %}{% trans 'Stop Condition' %}
+                                        {% else %}{{ report.tips|capfirst }}{% endif %}
+                                    </span>
+                                    <span class="ml-2 text-gray-800">{{ report.apraksts }}</span>
+                                    <span class="ml-2 text-gray-600 text-xs">{{ report.laiks|date:"d.m.Y H:i" }}</span>
+                                    {% if report.marsruts %}
+                                        <span class="ml-2 text-gray-500 text-xs">({% trans 'Route' %}: {{ report.marsruts.numurs }})</span>
+                                    {% endif %}
+                                    {% if report.pietura %}
+                                        <span class="ml-2 text-gray-500 text-xs">({% trans 'Stop' %}: {{ report.pietura.nosaukums }})</span>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-gray-500">{% trans "You have not submitted any reports yet." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                  const tabs = [
+                    { btn: 0, content: 'tab-activity' },
+                    { btn: 1, content: 'tab-saved' },
+                    { btn: 2, content: 'tab-reports' },
+                    { btn: 3, content: 'tab-notifications' }
+                  ];
+                  const btns = document.querySelectorAll('.flex.border-b button');
+                  const contents = tabs.map(t => document.getElementById(t.content));
+                  btns.forEach((btn, i) => {
+                    btn.addEventListener('click', function() {
+                      btns.forEach((b, j) => {
+                        b.classList.toggle('text-blue-600', i === j);
+                        b.classList.toggle('border-b-2', i === j);
+                        b.classList.toggle('border-blue-600', i === j);
+                        b.classList.toggle('text-gray-500', i !== j);
+                      });
+                      contents.forEach((c, j) => c.style.display = (i === j ? '' : 'none'));
+                    });
+                  });
+                });
+            </script>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Administrator Dashboard" %}{% endblock %}
+
+{% block content %}
+  <h1>{% trans "Admin Dashboard" %}</h1>
+  <h2>{% trans "Registered Users" %}</h2>
+  <ul>
+    {% for user in users %}
+      <li>{{ user.username }} ({{ user.loma }})</li>
+    {% empty %}
+      <li>{% trans "No users" %}</li>
+    {% endfor %}
+  </ul>
+  <h2>{% trans "Received notifications" %}</h2>
+  <ul>
+    {% for report in reports %}
+      <li>{{ report.created_at }} - {{ report.summary }}</li>
+    {% empty %}
+      <li>{% trans "No notifications" %}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

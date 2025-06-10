@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}SmartTransport - {% trans "Edit Profile" %}{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/statistics.css' %}?v={{ now|date:'U' }}">
+  <style>
+    .profile-edit-container {
+      animation: fadein 0.8s cubic-bezier(0.4,0,0.2,1);
+      max-width: 600px;
+      margin: 2.5rem auto;
+      padding: 2rem 1.5rem;
+      background: #f7fafd;
+      border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+    }
+    .profile-edit-container h1 {
+      color: #1769aa;
+      font-size: 2rem;
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+    .profile-edit-container form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .profile-edit-container form p {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      align-items: center;
+      gap: 0.6rem 1.2rem;
+      margin-bottom: 0.9rem;
+      margin-top: 0;
+    }
+    .profile-edit-container form p label {
+      margin-bottom: 0;
+      text-align: right;
+      padding-right: 0.5rem;
+      font-weight: 500;
+      color: #1769aa;
+      font-size: 1rem;
+    }
+    .profile-edit-container form p input,
+    .profile-edit-container form p select,
+    .profile-edit-container form p textarea {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 0;
+    }
+    .profile-edit-container button[type="submit"] {
+      background: linear-gradient(90deg, #1769aa 0%, #3ba5e6 100%);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 7px;
+      padding: 0.85rem 0;
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(23,105,170,0.08);
+      transition: background 0.2s;
+    }
+    .profile-edit-container button[type="submit"]:hover {
+      background: linear-gradient(90deg, #145a8c 0%, #2b8fd1 100%);
+    }
+    .profile-edit-container .back-link {
+      display: block;
+      margin: 1.5rem auto 0 auto;
+      text-align: center;
+      color: #1769aa;
+      font-weight: 500;
+      text-decoration: underline;
+      font-size: 1rem;
+      transition: color 0.2s;
+    }
+    .profile-edit-container .back-link:hover {
+      color: #3ba5e6;
+    }
+    @media (max-width: 600px) {
+      .profile-edit-container {
+        padding: 1rem 0.5rem;
+      }
+      .profile-edit-container h1 {
+        font-size: 1.3rem;
+      }
+      .profile-edit-container form p {
+        grid-template-columns: 1fr;
+        gap: 0.3rem 0;
+      }
+      .profile-edit-container form p label {
+        text-align: left;
+        padding-right: 0;
+        margin-bottom: 0.2rem;
+      }
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: none; }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="profile-edit-container">
+    <h1>{% trans "Edit Profile" %}</h1>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">{% trans "Save Changes" %}</button>
+    </form>
+    <a href="{% url 'users:profile' %}" class="back-link">&larr; {% trans "Back to Profile" %}</a>
+  </div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Operator Dashboard" %}{% endblock %}
+
+{% block content %}
+  <h1>{% trans "Operator Dashboard" %}</h1>
+  <h2>{% trans "Vehicles" %}</h2>
+  <ul>
+    {% for vehicle in vehicles %}
+      <li>{{ vehicle.name }} - {{ vehicle.status }}</li>
+    {% empty %}
+      <li>{% trans "No data" %}</li>
+    {% endfor %}
+  </ul>
+  <h2>{% trans "Traffic conditions" %}</h2>
+  <ul>
+    {% for cond in traffic_conditions %}
+      <li>{{ cond.route }}: {{ cond.status }}</li>
+    {% empty %}
+      <li>{% trans "No data" %}</li>
+    {% endfor %}
+  </ul>
+  <h2>{% trans "Latest reports" %}</h2>
+  <ul>
+    {% for report in latest_reports %}
+      <li>{{ report.created_at }} - {{ report.summary }}</li>
+    {% empty %}
+      <li>{% trans "No reports" %}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

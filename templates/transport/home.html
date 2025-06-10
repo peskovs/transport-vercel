@@ -1,0 +1,25 @@
+{# templates/transport/home.html #}
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block title %}{{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <h1>{% trans "Project Name" %}: {{ project_name }}</h1>
+  <p class="description">{% trans "Description" %}: {{ description }}</p>
+
+  <div class="quick-links">
+    <ul>
+      <li><a href="{% url 'transport:routes_list' %}">{% trans "Routes" %}</a></li>
+      <li><a href="{% url 'transport:traffic_information' %}">{% trans "Traffic Information" %}</a></li>
+      <li><a href="{% url 'transport:report_traffic' %}">{% trans "Report Traffic" %}</a></li>
+      <li><a href="{% url 'transport:statistics' %}">{% trans "Statistics" %}</a></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

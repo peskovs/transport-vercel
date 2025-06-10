@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Report traffic conditions" %}{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/statistics.css' %}?v={{ now|date:'U' }}">
+  <style>
+    .traffic-report-container {
+      animation: fadein 0.8s cubic-bezier(0.4,0,0.2,1);
+      max-width: 600px;
+      margin: 2.5rem auto;
+      padding: 2rem 1.5rem;
+      background: #f7fafd;
+      border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+    }
+    .traffic-report-container h1 {
+      color: #1769aa;
+      font-size: 2rem;
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+    .traffic-report-container form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .traffic-report-container label {
+      font-weight: 500;
+      color: #1769aa;
+      margin-bottom: 0.3rem;
+    }
+    .traffic-report-container input,
+    .traffic-report-container select,
+    .traffic-report-container textarea {
+      padding: 0.7rem 1rem;
+      border: 1.5px solid #b0cbe9;
+      border-radius: 7px;
+      background: #fff;
+      font-size: 1rem;
+      transition: border 0.2s;
+    }
+    .traffic-report-container input:focus,
+    .traffic-report-container select:focus,
+    .traffic-report-container textarea:focus {
+      border-color: #1769aa;
+      outline: none;
+    }
+    .traffic-report-container button[type="submit"] {
+      background: linear-gradient(90deg, #1769aa 0%, #3ba5e6 100%);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 7px;
+      padding: 0.85rem 0;
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(23,105,170,0.08);
+      transition: background 0.2s;
+    }
+    .traffic-report-container button[type="submit"]:hover {
+      background: linear-gradient(90deg, #145a8c 0%, #2b8fd1 100%);
+    }
+    @media (max-width: 700px) {
+      .traffic-report-container {
+        padding: 1rem 0.5rem;
+      }
+      .traffic-report-container h1 {
+        font-size: 1.3rem;
+      }
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: none; }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="traffic-report-container">
+    <h1>{% trans "Report traffic conditions" %}</h1>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">{% trans "Submit" %}</button>
+    </form>
+    <style>
+      .traffic-report-container form p {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        align-items: center;
+        gap: 0.6rem 1.2rem;
+        margin-bottom: 0.9rem;
+        margin-top: 0;
+      }
+      .traffic-report-container form p label {
+        margin-bottom: 0;
+        text-align: right;
+        padding-right: 0.5rem;
+        font-weight: 500;
+        color: #1769aa;
+        font-size: 1rem;
+      }
+      .traffic-report-container form p input,
+      .traffic-report-container form p select,
+      .traffic-report-container form p textarea {
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 0;
+      }
+      @media (max-width: 600px) {
+        .traffic-report-container form p {
+          grid-template-columns: 1fr;
+          gap: 0.3rem 0;
+        }
+        .traffic-report-container form p label {
+          text-align: left;
+          padding-right: 0;
+          margin-bottom: 0.2rem;
+        }
+      }
+    </style>
+  </div>
+{% endblock %}

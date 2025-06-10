@@ -1,0 +1,410 @@
+<!-- templates/transport/routes/details.html -->
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}SmartTransport - {{ route.numurs }} - {{ route.nosaukums }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{% url 'transport:routes_list' %}" class="text-blue-600 hover:text-blue-800 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        {% trans "Back to routes list" %}
+    </a>
+</div>
+
+<!-- Maršruta kartes virsraksts -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+    <div class="p-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between">
+            <div class="flex items-center mb-4 md:mb-0">
+                <div class="rounded-full w-16 h-16 flex items-center justify-center text-white text-2xl font-bold
+                    {% if route.transportlidzeklis_set.first.veids.nosaukums == 'Autobuss' %}bg-blue-600
+                    {% elif route.transportlidzeklis_set.first.veids.nosaukums == 'Tramvajs' %}bg-red-600
+                    {% else %}bg-green-600{% endif %}">
+                    {{ route.numurs }}
+                </div>
+                <div class="ml-4">
+                    <h1 class="text-2xl font-bold">{{ route.nosaukums }}</h1>
+                    <div class="flex items-center mt-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m-4 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                        <span class="text-gray-600 mr-3">
+                            {% if route.transportlidzeklis_set.first.veids.nosaukums == 'Autobuss' %}
+                                {% trans "Bus" %}
+                            {% elif route.transportlidzeklis_set.first.veids.nosaukums == 'Tramvajs' %}
+                                {% trans "Tram" %}
+                            {% elif route.transportlidzeklis_set.first.veids.nosaukums == 'Trolejbuss' %}
+                                {% trans "Trolleybus" %}
+                            {% else %}
+                                {{ route.transportlidzeklis_set.first.veids.nosaukums }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-2">
+                {% if user.is_authenticated %}
+                <button id="save-route-btn" class="px-3 py-1 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 flex items-center"
+                        data-route-id="{{ route.marsruts_id }}"
+                        aria-label="{% if is_saved %}{% trans 'Unsave' %}{% else %}{% trans 'Save' %}{% endif %}">
+                    {% if is_saved %}
+                        <!-- Filled flag icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v12l7-4 7 4V5a2 2 0 00-2-2H5z"/></svg>
+                        {% trans "Saved" %}
+                    {% else %}
+                        <!-- Outline flag icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3a2 2 0 00-2 2v12l7-4 7 4V5a2 2 0 00-2-2H5z"/></svg>
+                        {% trans "Save" %}
+                    {% endif %}
+                </button>
+                {% endif %}
+                <button id="share-route-btn" class="px-3 py-1 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    {% trans "Share" %}
+                </button>
+
+<script>
+// Save/Unsave Favorite Route (AJAX)
+function showToast(msg) {
+    let toast = document.createElement('div');
+    toast.innerText = msg;
+    toast.className = 'fixed bottom-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Share button logic
+    const shareBtn = document.getElementById('share-route-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = window.location.href;
+            if (navigator.share) {
+                navigator.share({ url: url })
+                    .catch(() => showToast('Could not share'));
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(url)
+                    .then(() => showToast('Link copied!'))
+                    .catch(() => showToast('Could not copy link'));
+            } else {
+                // Fallback for very old browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = url;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Link copied!');
+                } catch {
+                    showToast('Could not copy link');
+                }
+                document.body.removeChild(textarea);
+            }
+        });
+    }
+
+    // Save/Unsave button logic
+    const saveBtn = document.getElementById('save-route-btn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const routeId = saveBtn.getAttribute('data-route-id');
+            const isSaved = saveBtn.querySelector('svg.text-yellow-500') !== null;
+            // Dynamically get language prefix if present (e.g. /lv/)
+            let prefix = '';
+            const match = window.location.pathname.match(/^\/(\w{2})(\/|$)/);
+            if (match) {
+                prefix = '/' + match[1];
+            }
+            const url = prefix + (isSaved ? '/routes/remove_favorite/' : '/routes/save_favorite/');
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: 'route_id=' + encodeURIComponent(routeId),
+                redirect: 'manual', // Prevent following redirect
+            })
+            .then(async response => {
+                if (response.type === 'opaqueredirect' || response.status === 302 || response.url.includes('login')) {
+                    showToast('You must be logged in to save routes.');
+                    return;
+                }
+                let data;
+                try {
+                    data = await response.json();
+                } catch {
+                    showToast('Error');
+                    return;
+                }
+                if (data.status === 'saved' || data.status === 'removed') {
+                    window.location.reload();
+                } else {
+                    showToast(data.message || 'Error');
+                }
+            })
+            .catch(() => showToast('Error'));
+        });
+    }
+});
+</script>
+
+            </div>
+        </div>
+
+        <!-- Virziena selektors -->
+        <div class="mt-6 bg-gray-50 rounded-lg p-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="flex flex-1 w-full md:w-auto mb-4 md:mb-0">
+                    <button class="flex-1 py-2 px-4 rounded-l-md flex items-center justify-center bg-blue-600 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {% with first_stop=stops.first last_stop=stops.last %}
+                        {{ first_stop.pietura.nosaukums }} → {{ last_stop.pietura.nosaukums }}
+                        {% endwith %}
+                    </button>
+                    <button class="flex-1 py-2 px-4 rounded-r-md flex items-center justify-center bg-gray-200 text-gray-700 hover:bg-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {% with first_stop=stops.first last_stop=stops.last %}
+                        {{ last_stop.pietura.nosaukums }} → {{ first_stop.pietura.nosaukums }}
+                        {% endwith %}
+                    </button>
+                </div>
+
+                <div class="flex space-x-4 ml-0 md:ml-6 w-full md:w-auto justify-between md:justify-start">
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500">{% trans "Distance" %}</div>
+                        <div class="font-medium">
+                            ~{{ total_distance|floatformat:1 }} km
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500">{% trans "Time" %}</div>
+                        <div class="font-medium">
+                            ~{{ total_time }} min
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500">{% trans "Stops" %}</div>
+                        <div class="font-medium">{{ stops.count }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cilnes -->
+    <div class="flex border-t border-gray-200">
+        <a href="?tab=schedule" class="px-4 py-3 font-medium text-sm flex-1 text-center {% if request.GET.tab|default:'schedule' == 'schedule' %}text-blue-600 border-b-2 border-blue-600{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="inline h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {% trans "Schedule" %}
+        </a>
+        <a href="?tab=stops" class="px-4 py-3 font-medium text-sm flex-1 text-center {% if request.GET.tab == 'stops' %}text-blue-600 border-b-2 border-blue-600{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="inline h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            {% trans "Stops" %}
+        </a>
+
+
+    </div>
+</div>
+
+{% if request.GET.tab|default:'schedule' == 'schedule' %}
+<!-- Cilnes saturs - Kustības grafiks -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h3 class="text-lg font-medium">{% trans "Schedule" %}</h3>
+                <p class="text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="inline h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {% with first_stop=stops.first last_stop=stops.last %}
+                    {% trans "Direction" %}: {{ first_stop.pietura.nosaukums }} → {{ last_stop.pietura.nosaukums }}
+                    {% endwith %}
+                </p>
+            </div>
+
+            <div class="flex space-x-2">
+                <form method="get" class="flex space-x-2">
+                    <input type="hidden" name="day" value="today">
+                    <button type="submit" class="px-3 py-1 rounded {% if request.GET.day|default:'today' == 'today' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                        {% trans "Today" %}
+                    </button>
+                </form>
+                <form method="get" class="flex space-x-2">
+                    <input type="hidden" name="day" value="tomorrow">
+                    <button type="submit" class="px-3 py-1 rounded {% if request.GET.day == 'tomorrow' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                        {% trans "Tomorrow" %}
+                    </button>
+                </form>
+                <form method="get" class="flex space-x-2">
+                    <input type="hidden" name="day" value="weekend">
+                    <button type="submit" class="px-3 py-1 rounded {% if request.GET.day == 'weekend' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                        {% trans "Weekend" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="bg-blue-50 p-4 rounded-lg mb-6">
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                    <p class="font-medium text-blue-800">{% trans "Schedule Information" %}: {% now "l" %} ({% now "DATE_FORMAT" %})</p>
+                    <p class="text-sm text-blue-600">
+                        {% trans "Times may vary due to traffic conditions, weather, or other circumstances. Average trip time" %}: {{ total_time }} min
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {% for schedule in schedules %}
+            <div class="p-3 border rounded-lg {% if schedule.transp.noslogojums > 3 %}border-yellow-300 bg-yellow-50{% else %}border-gray-200{% endif %}">
+                <div class="text-center">
+                    <div class="text-lg font-medium">{{ schedule.atiesanas_laiks|time:"H:i" }}</div>
+                    <div class="flex justify-center mt-1">
+                        {% for i in "12345"|make_list %}
+                        <div class="w-2 h-2 rounded-full {% if forloop.counter <= schedule.transp.noslogojums %}bg-red-500{% else %}bg-gray-300{% endif %} mx-0.5"></div>
+                        {% endfor %}
+                    </div>
+                    {% if schedule.transp.noslogojums > 3 %}
+                    <div class="text-xs text-orange-600 mt-1">
+                        {% trans "High congestion" %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-8 text-gray-500">
+                {% trans "No schedules available for this route." %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if request.GET.tab == 'stops' %}
+<!-- Cilnes saturs - Pieturas -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden mt-4">
+    <div class="p-6">
+        <h3 class="text-lg font-medium mb-4">{% trans "Stops" %}</h3>
+        <ol class="list-decimal list-inside space-y-2">
+            {% for stop in stops %}
+            <li>
+                <span class="font-semibold">{{ stop.pietura.nosaukums }}</span>
+                {% if stop.pietura.adrese %}<span class="text-gray-500 text-sm">({{ stop.pietura.adrese }})</span>{% endif %}
+            </li>
+            {% empty %}
+            <li class="text-gray-500">{% trans "No stops available for this route." %}</li>
+            {% endfor %}
+        </ol>
+    </div>
+</div>
+{% endif %}
+
+<div id="atsauksmes-section" class="bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-xl shadow-lg overflow-hidden mt-10 mb-10">
+    <div class="p-8">
+        <div class="flex items-center mb-6">
+            <svg class="h-7 w-7 text-yellow-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2h2m2-4h6a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+            <h3 class="text-2xl font-semibold text-gray-800">{% trans "Reviews" %}</h3>
+        </div>
+        {% if atsauksmes %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {% for review in atsauksmes %}
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex gap-4 items-start {% if user_review and review.id == user_review.id %}ring-2 ring-blue-400{% endif %}">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-lg font-bold text-blue-600 shadow">
+                        {{ review.lietotajs.username|first|upper }}
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center mb-1">
+                            <span class="font-semibold text-gray-800">{{ review.lietotajs.username }}</span>
+                            <span class="ml-3 text-gray-400 text-xs">
+                                <svg class="inline h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                {{ review.laiks|date:"Y-m-d H:i" }}
+                            </span>
+                        </div>
+                        <div class="text-gray-700 leading-relaxed whitespace-pre-line">{{ review.teksts|linebreaks }}</div>
+                        {% if review.novērtējums %}
+                        <div class="mt-1 text-yellow-600 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.386 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z"/></svg>
+                            <span class="font-semibold">{{ review.novērtējums }}/5</span>
+                        </div>
+                        {% endif %}
+                        {% if user.is_authenticated and review.lietotajs == user %}
+                        <form method="post" action="{% url 'transport:delete_atsauksme' review.pk %}" style="display:inline; margin-top: 0.5rem;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="text-red-600 hover:underline ml-2">{% trans "Delete" %}</button>
+                        </form>
+                        {% elif user.is_authenticated and user.is_superuser %}
+                        <form method="post" action="{% url 'transport:delete_atsauksme' review.pk %}" style="display:inline; margin-top: 0.5rem;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="text-red-600 hover:underline ml-2">{% trans "Delete" %}</button>
+                        </form>
+                        {% elif user.is_authenticated and user.loma == 'administrators' %}
+                        <form method="post" action="{% url 'transport:delete_atsauksme' review.pk %}" style="display:inline; margin-top: 0.5rem;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="text-red-600 hover:underline ml-2">{% trans "Delete" %}</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-gray-400 mb-8 text-center text-lg">{% trans "No reviews yet for this route." %}</div>
+        {% endif %}
+        {% if atsauksme_form %}
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 max-w-xl mx-auto mt-12 shadow">
+            <div class="flex items-center mb-3">
+                <svg class="h-6 w-6 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 3.5a2.121 2.121 0 013 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>
+                <h4 class="font-semibold text-blue-700">{% trans "Write a Review" %}</h4>
+            </div>
+            <form method="post" action="{% url 'transport:submit_atsauksme' route.pk %}" class="flex flex-col gap-4">
+                {% csrf_token %}
+                {% for field in atsauksme_form %}
+                    <div class="flex flex-col gap-1">
+                        <label for="{{ field.id_for_label }}" class="font-medium text-gray-700">{{ field.label }}:</label>
+                        {{ field }}
+                        {% if field.help_text %}<span class="text-xs text-gray-500">{{ field.help_text }}</span>{% endif %}
+                        {% for error in field.errors %}<span class="text-xs text-red-500">{{ error }}</span>{% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="w-max px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow hover:bg-blue-700 transition self-start">{% trans "Submit Review" %}</button>
+            </form>
+        </div>
+        {% elif user_review %}
+            <div class="mt-8 text-green-700 text-center text-lg font-medium flex items-center justify-center gap-2">
+                <svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                {% trans "You have already submitted a review for this route." %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
