@@ -1,0 +1,59 @@
+.report-form-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.report-form-container h1 {
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+  text-align: center;
+  color: #333;
+}
+
+.report-form-container form p {
+  margin-bottom: 1rem;
+}
+
+.report-form-container label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.report-form-container input[type="text"],
+.report-form-container textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.report-form-container textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.report-form-container button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.report-form-container button:hover {
+  background-color: #0056b3;
+}

@@ -1,0 +1,115 @@
+.statistics-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem 1.5rem;
+  background: #f7fafd;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+}
+
+.statistics-container h1 {
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+  text-align: center;
+  color: #1769aa;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.summary-stats {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.summary-stats li {
+  flex: 1 1 180px;
+  background: linear-gradient(120deg, #e3f0fc 0%, #fafdff 100%);
+  border-left: 6px solid #1769aa;
+  border-radius: 10px;
+  padding: 1.2rem 1.2rem 1rem 1.2rem;
+  margin-bottom: 0;
+  box-shadow: 0 1px 4px rgba(23,105,170,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 160px;
+}
+.summary-stats .label {
+  font-size: 1.05rem;
+  color: #1769aa;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+.summary-stats .value {
+  font-size: 1.5rem;
+  color: #222;
+  font-weight: 600;
+}
+
+.statistics-container h2 {
+  color: #1769aa;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.stat-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(23,105,170,0.05);
+}
+.stat-table th, .stat-table td {
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+}
+.stat-table th {
+  background: #e3f0fc;
+  color: #1769aa;
+  font-weight: 700;
+  font-size: 1.05rem;
+  border-bottom: 2px solid #b0cbe9;
+}
+.stat-table tr:nth-child(even) {
+  background: #f5faff;
+}
+.stat-table tr:hover {
+  background: #eaf4fb;
+  transition: background 0.2s;
+}
+.stat-table td {
+  color: #333;
+  font-size: 1.01rem;
+}
+
+@media (max-width: 700px) {
+  .statistics-container {
+    padding: 1rem 0.5rem;
+  }
+  .summary-stats {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .summary-stats li {
+    min-width: 0;
+    width: 100%;
+    align-items: flex-start;
+  }
+  .stat-table th, .stat-table td {
+    padding: 0.7rem 0.5rem;
+    font-size: 0.97rem;
+  }
+}
+
+hr {
+  margin: 2rem 0 2rem 0;
+  border: none;
+  border-top: 1.5px solid #e3f0fc;
+}
